@@ -20,7 +20,7 @@ x += 1*np.sin(2*np.pi*F*t)
 h_org = np.ones(L)/L
 
 #output via Lin-Con
-y_lc = dsp.linearconv(x,h_org,mode = 1, plotflag = False)
+y_lc = dsp.linearconv(x,h_org,mode = 0, plotflag = False)
 
 #Zero padding
 x = np.append(x,np.zeros(N - M)).reshape(-1)

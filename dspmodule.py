@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.signal import firwin
+from scipy.signal import freqz
 
 def dft(signal, N=None, win=0):
     """
@@ -123,6 +125,36 @@ def circonv(x, h, plotflag=False):
         plt.show()
 
     return conv_result.real
+
+
+def firdesign(tap, Fs, Fc, win="boxcar", fir_type='lowpass'):
+    # Calculate the normalized cutoff frequency
+    normalized_cutoff = Fc / (Fs / 2)
+    
+    # Design the FIR filter coefficients
+    if fir_type == 'lowpass':
+        b = firwin(tap, normalized_cutoff, window=win)
+    elif fir_type == 'highpass':
+        b = firwin(tap, normalized_cutoff, window=win, pass_zero=False)
+    else:
+        raise ValueError("Unsupported fir_type. Choose 'lowpass' or 'highpass'.")
+    
+    return b, [1.0]  # Return filter coefficients 'b' and 'a' (always [1.0] for FIR)
+
+
+
+
+def coeff2freq_response(b, a):
+    # Compute the frequency response
+    w, H = freqz(b, a)
+    
+    return w, H
+
+
+
+
+
+
 # Additional utility functions if needed
 # ...
 

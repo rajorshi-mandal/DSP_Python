@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from  scipy import signal
 from scipy.signal import firwin
 from scipy.signal import freqz
 
@@ -150,10 +151,94 @@ def coeff2freq_response(b, a):
     
     return w, H
 
+# dspmodule.py
 
+def tf2polezero(b, a):
+    """
+    Convert transfer function coefficients to poles, zeros, and gain.
 
+    Parameters:
+    - b: Numerator coefficients of the transfer function.
+    - a: Denominator coefficients of the transfer function.
 
+    Returns:
+    - z: Zeros of the transfer function.
+    - p: Poles of the transfer function.
+    - k: Gain of the transfer function.
+    """
+    z, p, k = signal.tf2zpk(b, a)   
+    return z, p, k
 
+def polezero2freq_response(z, p, k):
+    """
+    Convert poles, zeros, and gain to frequency response.
+
+    Parameters:
+    - z: Zeros of the transfer function.
+    - p: Poles of the transfer function.
+    - k: Gain of the transfer function.
+
+    Returns:
+    - w: Frequencies.
+    - H: Frequency response.
+    """
+    w, H = signal.freqz_zpk(z, p, k)
+    return w, H
+
+def linearfilter(b, a, x):
+    """
+    Apply linear filtering to the input signal.
+
+    Parameters:
+    - b: Numerator coefficients of the filter.
+    - a: Denominator coefficients of the filter.
+    - x: Input signal.
+
+    Returns:
+    - y: Output signal after filtering.
+    """
+    y = signal.lfilter(b, a, x)
+    return y
+
+def butterorder(wp, wst, Ap, As, Fs):
+    """
+    Calculate the order and cutoff frequency for a Butterworth filter.
+
+    Parameters:
+    - wp: Passband edge frequency in rad/s.
+    - wst: Stopband edge frequency in rad/s.
+    - Ap: Maximum attenuation in the passband (dB).
+    - As: Minimum attenuation in the stopband (dB).
+    - Fs: Sampling frequency in Hz.
+
+    Returns:
+    - N: Order of the filter.
+    - wc: Cutoff frequency in rad/s.
+    """
+    # Calculate the order using the approximation formula
+    N = np.ceil((np.log10((10**(As / 10) - 1) / (10**(Ap / 10) - 1)) / (2 * np.log10(wst / wp))))
+    
+    # Calculate the cutoff frequency based on the provided specifications
+    wc = min(wp / ((10**(Ap / 10) - 1)**(1 / (2 * N))), (Fs / 2) - 1e-9)
+
+    return int(N), wc
+
+def iirbutterdesign(N, wc, Fs, iir_type='lowpass'):
+    """
+    Design an IIR Butterworth filter.
+
+    Parameters:
+    - N: Order of the filter.
+    - wc: Cutoff frequency in rad/s.
+    - Fs: Sampling frequency in Hz.
+    - iir_type: Type of the filter ('lowpass', 'highpass', 'bandpass', 'bandstop').
+
+    Returns:
+    - b: Numerator coefficients of the filter.
+    - a: Denominator coefficients of the filter.
+    """
+    b, a = signal.butter(N, wc / (Fs / 2), btype=iir_type, analog=False)
+    return b, a
 
 # Additional utility functions if needed
 # ...
